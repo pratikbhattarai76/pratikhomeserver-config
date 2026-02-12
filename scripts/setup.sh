@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 
 set -e 
@@ -53,5 +52,5 @@ echo "sudo systemctl enable cloudflared"
 echo "--- Immutable Storage ---"
 UUID="4250e634-f248-4591-b2b0-6d12919f6c8e"
 if ! grep -q "$UUID" /et
-```
+
 
