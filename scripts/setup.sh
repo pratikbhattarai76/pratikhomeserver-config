@@ -1,3 +1,4 @@
+```bash
 #!/bin/bash
 
 set -e 
@@ -12,13 +13,16 @@ if ! [ -x "$(command -v docker)" ]; then
     sudo usermod -aG docker $USER
 fi
 
+# Enable Docker at boot
+sudo systemctl enable docker
+
 echo "--- Nvidia & Gpu Setup ---"
 # Install Drivers
 if ! [ -x "$(command -v nvidia-smi)" ]; then
     sudo ubuntu-drivers install
 fi
 
-# Install NVIDIA Container Toolkit (The Professional standard for AI/Transcoding)
+# Install NVIDIA Container Toolkit
 if ! [ -x "$(command -v nvidia-ctk)" ]; then
     curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
     curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
@@ -30,13 +34,24 @@ if ! [ -x "$(command -v nvidia-ctk)" ]; then
     sudo systemctl restart docker
 fi
 
-echo "--- Immutable Storage ---"
-UUID="4250e634-f248-4591-b2b0-6d12919f6c8e"
-if ! grep -q "$UUID" /etc/fstab; then
-    sudo mkdir -p /mnt/storage
-    echo "UUID=$UUID /mnt/storage ext4 defaults,nofail 0 2" | sudo tee -a /etc/fstab
-    sudo mount -a
+echo "--- Cloudflared Setup ---"
+if ! [ -x "$(command -v cloudflared)" ]; then
+    wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+    sudo dpkg -i cloudflared-linux-amd64.deb
+    rm cloudflared-linux-amd64.deb
 fi
 
-echo "--- Setup Complete ---"
-echo "Please reboot with: sudo reboot"
+echo "If this is first time, run:"
+echo "cloudflared tunnel login"
+
+# Install Cloudflared as a system service 
+echo "To install tunnel as service after creating it:"
+echo "cloudflared service install"
+echo "Then enable it with:"
+echo "sudo systemctl enable cloudflared"
+
+echo "--- Immutable Storage ---"
+UUID="4250e634-f248-4591-b2b0-6d12919f6c8e"
+if ! grep -q "$UUID" /et
+```
+
