@@ -1,0 +1,16 @@
+# Secrets
+.env
+*.secret
+password.txt
+
+# OS Junks
+.DS_Store
+thumbs.db
+
+# Logs/Temp
+*.log
+tmp/
+*.swp
+
+# Docker Data (Just the config)
+**/data/
