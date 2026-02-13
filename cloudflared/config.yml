@@ -11,6 +11,10 @@ ingress:
   # Netdata
   - hostname: netdata.pratik-labs.xyz
     service: http://192.168.1.250:19999
+  
+  # NextCloud
+  - hostname: nextcloud.pratik-labs.xyz
+    service: http://192.168.1.250.8081
 
   # Catch-all (Security)
   - service: http_status:404
