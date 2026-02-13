@@ -10,8 +10,8 @@ ingress:
 
   # Netdata
   - hostname: netdata.pratik-labs.xyz
-    service: https://192.168.1.250:19999
-    
+    service: http://192.168.1.250:19999
+
   # Catch-all (Security)
   - service: http_status:404
-  
+
