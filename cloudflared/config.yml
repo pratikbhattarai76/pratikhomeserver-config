@@ -1,9 +1,12 @@
 tunnel: pratikhomeserver
-credentials-file: ~/.cloudflared/token.json #This is a example. Due to security concerns I have replaced the actual token with placeholder token.
+credentials-file: /home/pratikserver/.cloudflared/Token.json #This is a example. Due to security concerns I have replaced the actual token with placeholder token.
 
 ingress:
-  - hostname: web.pratik-labs.xyz
-    service: http://localhost:80
+  # Portainer Dashboard
   - hostname: portainer.pratik-labs.xyz
-    service: http://localhost:9443
+    service: https://192.168.1.250:9443
+    originRequest:
+      noTLSVerify: true
+
+  # Catch-all (Security)
   - service: http_status:404
