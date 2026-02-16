@@ -4,17 +4,15 @@ credentials-file: /home/pratikserver/.cloudflared/Token.json #This is a example.
 ingress:
   # Portainer Dashboard
   - hostname: portainer.pratik-labs.xyz
-    service: https://192.168.1.250:9443
-    originRequest:
-      noTLSVerify: true
-
+    service: http://192.168.1.250:80
+    
   # Netdata
   - hostname: netdata.pratik-labs.xyz
-    service: http://192.168.1.250:19999
+    service: http://192.168.1.250:80
   
   # NextCloud
   - hostname: nextcloud.pratik-labs.xyz
-    service: http://192.168.1.250.8081
+    service: http://192.168.1.250.80
 
   # Catch-all (Security)
   - service: http_status:404
