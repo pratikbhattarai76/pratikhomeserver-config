@@ -1,5 +1,18 @@
 services:
-  # Container Management 
+  # Like Traffic Manager
+  nginx-proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - '80:80'              # HTTP traffic from Cloudflare Tunnel
+      - '81:81'              # Admin UI for Nginx (Internal only)
+      - '443:443'            # HTTPS traffic
+    volumes:
+      - nginx_data:/data
+      - nginx_letsencrypt:/etc/letsencrypt
+
+  # Container Management
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
@@ -8,7 +21,7 @@ services:
       - no-new-privileges:true
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock # The "Brain" connection
       - portainer_data:/data
     ports:
       - "9443:9443"
@@ -36,7 +49,7 @@ services:
       - /etc/os-release:/host/etc/os-release:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  # Private Cloud
+  # Nextcloud Database
   nextcloud-db:
     image: mariadb:10.11
     container_name: nextcloud-db
@@ -50,6 +63,7 @@ services:
       - MARIADB_PASSWORD=${NC_DB_PASSWORD}
       - MARIADB_ROOT_PASSWORD=${NC_ROOT_PASSWORD}
 
+  # Nextcloud App
   nextcloud-app:
     image: nextcloud:latest
     container_name: nextcloud
@@ -60,19 +74,21 @@ services:
       - nextcloud-db
     volumes:
       - nextcloud_data:/var/www/html
-      - /mnt/storage/Photos:/mnt/photos:ro
-      - /mnt/storage/Photos/FamilyUploads:/mnt/uploads:rw
+      - /mnt/storage/Photos:/mnt/photos:ro         # Archive (Read-Only)
+      - /mnt/storage/Photos/FamilyUploads:/mnt/uploads:rw # Uploads (Read-Write)
     environment:
       - MYSQL_PASSWORD=${NC_DB_PASSWORD}
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
       - MYSQL_HOST=nextcloud-db
 
-# This defines the "Hidden" system volumes
+# These named volumes are managed by Docker in /var/lib/docker/volumes
 volumes:
+  nginx_data:
+  nginx_letsencrypt:
   portainer_data:
-  nextcloud_db:
-  nextcloud_data:
   netdataconfig:
   netdatalib:
   netdatacache:
+  nextcloud_db:
+  nextcloud_data:
