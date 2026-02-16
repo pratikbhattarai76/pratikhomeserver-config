@@ -9,7 +9,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./portainer_data:/data
+      - portainer_data:/data
     ports:
       - "9443:9443"
 
@@ -43,7 +43,7 @@ services:
     restart: always
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
-      - ./nextcloud_db:/var/lib/mysql
+      - nextcloud_db:/var/lib/mysql
     environment:
       - MARIADB_DATABASE=nextcloud
       - MARIADB_USER=nextcloud
@@ -59,7 +59,7 @@ services:
     depends_on:
       - nextcloud-db
     volumes:
-      - ./nextcloud_data:/var/www/html
+      - nextcloud_data:/var/www/html
       - /mnt/storage/Photos:/mnt/photos:ro
       - /mnt/storage/Photos/FamilyUploads:/mnt/uploads:rw
     environment:
@@ -68,7 +68,11 @@ services:
       - MYSQL_USER=nextcloud
       - MYSQL_HOST=nextcloud-db
 
+# This defines the "Hidden" system volumes
 volumes:
+  portainer_data:
+  nextcloud_db:
+  nextcloud_data:
   netdataconfig:
   netdatalib:
   netdatacache:
