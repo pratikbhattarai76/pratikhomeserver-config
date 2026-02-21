@@ -1,0 +1,87 @@
+---
+- name: "Pratik-Labs: Complete IAC"
+  hosts: homeserver
+  become: yes
+  vars:
+    server_user: "pratikserver"
+    hdd_uuid: "4250e634-f248-4591-b2b0-6d12919f6c8e"
+    repo_url: "https://github.com/pratikbhattarai76/pratikhomeserver-config.git"
+    dest_path: "/home/{{ server_user }}/pratikhomeserver-config"
+
+  tasks:
+    - name: 1. System Maintenance - Update and Upgrade
+      apt:
+        update_cache: yes
+        upgrade: dist
+        autoremove: yes
+
+    - name: 2. Install Professional Tooling Baseline
+      apt:
+        name:
+          - curl
+          - git
+          - ufw
+          - htop
+          - software-properties-common
+          - python3-pip
+        state: present
+
+    - name: 3. GPU Architecture - Auto-Detect and Install NVIDIA Drivers
+      shell: "ubuntu-drivers autoinstall"
+      args:
+        creates: /usr/bin/nvidia-smi  # Only runs if drivers aren't installed
+
+    - name: 4. Docker Engine - Deployment via Official Script
+      shell: "curl -fsSL https://get.docker.com | sh"
+      args:
+        creates: /usr/bin/docker
+
+    - name: 5. Permissions - Add User to Docker Group
+      user:
+        name: "{{ server_user }}"
+        groups: docker
+        append: yes
+
+    - name: 6. NVIDIA Container Toolkit - Enable GPU for Docker
+      shell: |
+        curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg --yes
+        curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+        sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+        tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+        apt update
+        apt install -y nvidia-container-toolkit
+        nvidia-ctk runtime configure --runtime=docker
+        systemctl restart docker
+      args:
+        creates: /usr/bin/nvidia-ctk
+
+    - name: 7. Storage Persistence - Mount 1TB HDD via UUID
+      mount:
+        path: /mnt/storage
+        src: "UUID={{ hdd_uuid }}"
+        fstype: ext4
+        opts: defaults,nofail
+        state: mounted
+
+    - name: 8. Git Sync - Pull latest Blueprints from GitHub
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ dest_path }}"
+        version: main
+        force: yes
+      become: no # Run as pratikserver, not root
+
+    - name: 9. Security - Configure UFW Firewall Rules
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - '22'   # SSH
+        - '80'   # HTTP (Nginx)
+        - '443'  # HTTPS (Nginx)
+        - '81'   # Nginx Admin UI
+
+    - name: 10. Final Orchestration - Launch Master Application Stack
+      shell: "docker compose -f {{ dest_path }}/docker/services/docker-compose.yml up -d"
+      become: no
