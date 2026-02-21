@@ -81,7 +81,12 @@
         - '80'   # HTTP (Nginx)
         - '443'  # HTTPS (Nginx)
         - '81'   # Nginx Admin UI
-
-    - name: 10. Final Orchestration - Launch Master Application Stack
+    
+    - name: 10. Networking - Install Tailscale (Management VPN)
+      shell: "curl -fsSL https://tailscale.com/install.sh | sh"
+      args:
+        creates: /usr/bin/tailscale
+ 
+    - name: 11. Final Orchestration - Launch Master Application Stack
       shell: "docker compose -f {{ dest_path }}/docker/services/docker-compose.yml up -d"
       become: no
