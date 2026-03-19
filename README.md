@@ -46,7 +46,7 @@ The infrastructure is managed from a dedicated **Arch Linux** workstation, estab
 ├── README.md
 └── scripts
     └── setup.sh
-```
+
 
 
 
